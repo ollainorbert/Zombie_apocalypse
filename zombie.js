@@ -68,7 +68,7 @@ function zombieMove(position, rnumber) {
 	}
 }
 
-function addZombies() {
+function spawnZombies() {
 	for (var i = 0; i < 5; ++i) {
 		zombies.push({
 			x: zombieSpawnLocationX(i),
@@ -80,11 +80,7 @@ function addZombies() {
 				position: 'absolute'
 			}).addClass('zombie')
 		});
-	}
-}
-
-function spawnZombies() {
-	for (var i in zombies) {
+		
 		var zombie = zombies[i];
 		var zombieImg = zombie.img;
 
@@ -259,11 +255,6 @@ function shoot() {
 	}
 }
 
-function move() {
-	animateZombies();
-	//spawnMoreZombies();
-}
-
 function moveHero() {
 	hero.animate({
 		left: hero_position.x,
@@ -271,8 +262,7 @@ function moveHero() {
 	}, hero_movement_speed);
 }
 
-$(window).on('keydown', function(e) {
-	var key = e.which;
+function move_controll(key) {
 	if( (key != KEYLEFT) && (key != KEYRIGHT) && (key != KEYDOWN) && (key != KEYUP) ) {
 		return;
 	}
@@ -328,72 +318,24 @@ $(window).on('keydown', function(e) {
 		}		
 	
 	}
+}
+
+function setup() {
+	addHero();
+	spawnZombies();
+}
+
+$(window).on('keydown', function(e) {
+	move_controll(e.which);
 });
 
 $(window).on('keydown', function(e2) {
 	var key = e2.which;
-	if (key == KEYSPACE) {
-		shoot();
-	}
+	if (key == KEYSPACE) { shoot(); }
 });
 
-$(window).on('keydown', function(e3) {
-	var key = e3.which;
-	if( (key != KEYLEFT) && (key != KEYRIGHT) && (key != KEYDOWN) && (key != KEYUP) ) {
-		return;
-	}
-	
-	hero_position.x = hero.position().left;
-	hero_position.y = hero.position().top;
-	
-	if ( hero.is(':animated')) {
-		return;
-	} else {
-		if (key != hero_aim_pos) {
-			if (key == KEYLEFT) {
-				$('#hero').css('transform','rotate(' + 0 + 'deg)');
-				hero_aim_pos = KEYLEFT;
-			} else if (key == KEYUP) {
-				$('#hero').css('transform','rotate(' + 90 + 'deg)');
-				hero_aim_pos = KEYUP;
-			} else if (key == KEYRIGHT) {
-				$('#hero').css({
-					'-moz-transform': 'scale(-1, 1)',
-					'-webkit-transform': 'scale(-1, 1)',
-					'-o-transform': 'scale(-1, 1)',
-					'transform': 'scale(-1, 1)',
-					'filter': 'FlipH'
-				});
-				hero_aim_pos = KEYRIGHT;
-			} else if (key == KEYDOWN) {
-				$('#hero').css('transform','rotate(' + 270 + 'deg)');
-				hero_aim_pos = KEYDOWN;
-			}
-		} else {
-			if (key == KEYLEFT) {
-				hero_position.x -= field_size;
-			} else if (key == KEYUP) {
-				hero_position.y -= field_size;
-			} else if (key == KEYRIGHT) {
-				hero_position.x += field_size;
-			} else if (key == KEYDOWN) {
-				hero_position.y += field_size;
-			}
-			
-			if( (hero_position.x >= 0) &&
-				(hero_position.y >= 0) &&
-				(hero_position.x < area_size) &&
-				(hero_position.y < area_size)) {
-				moveHero();
-			}
-			
-			for (var i in zombies) {
-				var zombie = zombies[i];
-				isEated(zombie.x, zombie.y);
-			}
-		}		
-	
-	}
+$(window).on('keydown', function(ee) {
+	move_controll(ee.which);
 });
 
 $(document).ready(function(){
@@ -428,9 +370,8 @@ $(document).ready(function(){
 		'z-index' : '1'
 	}).appendTo(gameArea);
 
-	addHero();
-	addZombies();
-	spawnZombies();
-	game_zombie_moving = setInterval(move, game_speed);
+	setup();
+	
+	game_zombie_moving = setInterval(animateZombies, game_speed);
 	game_zombie_moving = setInterval(spawnMoreZombies, game_speed*5);
 });
